@@ -1,0 +1,55 @@
+using Microsoft.EntityFrameworkCore;
+using Presentech.Business.Interfaces;
+using Presentech.Business.Models;
+using Presentech.Business.Services;
+using Presentech.DataAccess.Context;
+using Presentech.DataManagement.Interfaces;
+using Presentech.DataManagement.Services;
+
+namespace Presentech.Api.Extensions;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddApplicationServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        // =========================
+        // BASE DE DATOS
+        // =========================
+        services.AddDbContext<PresentechDbContext>(options =>
+            options.UseNpgsql(configuration.GetConnectionString("PresentechDb")));
+
+        // =========================
+        // UNIT OF WORK
+        // =========================
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // =========================
+        // DATA MANAGEMENT
+        // =========================
+        services.AddScoped<IProfesorDataService, ProfesorDataService>();
+        services.AddScoped<IEstudianteDataService, EstudianteDataService>();
+        services.AddScoped<IParaleloDataService, ParaleloDataService>();
+        services.AddScoped<IClaseDataService, ClaseDataService>();
+        services.AddScoped<IClaseHorarioDataService, ClaseHorarioDataService>();
+        services.AddScoped<IAsistenciaDataService, AsistenciaDataService>();
+
+        // =========================
+        // JWT SETTINGS (para AuthService)
+        // =========================
+        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
+            ?? throw new InvalidOperationException("No se encontró la configuración JwtSettings.");
+        services.AddSingleton(jwtSettings);
+
+        // =========================
+        // BUSINESS
+        // =========================
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IClaseService, ClaseService>();
+        services.AddScoped<IAsistenciaService, AsistenciaService>();
+        services.AddScoped<IEstudianteService, EstudianteService>();
+
+        return services;
+    }
+}

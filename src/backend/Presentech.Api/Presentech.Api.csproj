@@ -7,7 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.25" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Presentech.Business\Presentech.Business.csproj" />
+    <ProjectReference Include="..\Presentech.DataAccess\Presentech.DataAccess.csproj" />
+    <ProjectReference Include="..\Presentech.DataManagement\Presentech.DataManagement.csproj" />
   </ItemGroup>
 
 </Project>

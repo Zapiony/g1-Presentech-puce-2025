@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Presentech.Api/Presentech.Api.csproj" />
+  <Project Path="Presentech.Business/Presentech.Business.csproj" />
+  <Project Path="Presentech.DataAccess/Presentech.DataAccess.csproj" />
+  <Project Path="Presentech.DataManagement/Presentech.DataManagement.csproj" />
+</Solution>

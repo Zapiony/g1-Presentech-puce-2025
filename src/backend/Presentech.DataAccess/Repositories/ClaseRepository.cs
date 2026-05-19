@@ -1,0 +1,62 @@
+using Presentech.DataAccess.Context;
+using Presentech.DataAccess.Entities;
+using Presentech.DataAccess.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace Presentech.DataAccess.Repositories
+{
+    public class ClaseRepository : IClaseRepository
+    {
+        private readonly PresentechDbContext _context;
+
+        public ClaseRepository(PresentechDbContext context)
+        {
+            _context = context;
+        }
+
+        // =========================
+        // CONSULTAS
+        // =========================
+        public async Task<IReadOnlyList<ClaseEntity>> ObtenerPorProfesorAsync(int id_profesor, CancellationToken cancellationToken = default)
+        {
+            return await _context.Clases
+                .AsNoTracking()
+                .Include(c => c.Paralelo)
+                .Include(c => c.ClasesHorario)
+                    .ThenInclude(ch => ch.DiaSemana)
+                .Where(c => c.id_profesor == id_profesor && c.activo)
+                .OrderBy(c => c.materia)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<ClaseEntity?> ObtenerPorIdAsync(int id_clase, CancellationToken cancellationToken = default)
+        {
+            return await _context.Clases
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.id_clase == id_clase && c.activo, cancellationToken);
+        }
+
+        public async Task<ClaseEntity?> ObtenerConHorarioAsync(int id_clase, CancellationToken cancellationToken = default)
+        {
+            return await _context.Clases
+                .AsNoTracking()
+                .Include(c => c.Paralelo)
+                .Include(c => c.ClasesHorario)
+                    .ThenInclude(ch => ch.DiaSemana)
+                .FirstOrDefaultAsync(c => c.id_clase == id_clase && c.activo, cancellationToken);
+        }
+
+        // =========================
+        // COMANDOS
+        // =========================
+        public async Task AgregarAsync(ClaseEntity clase, CancellationToken cancellationToken = default)
+        {
+            await _context.Clases.AddAsync(clase, cancellationToken);
+        }
+
+        public void Actualizar(ClaseEntity clase)
+        {
+            _context.Clases.Update(clase);
+        }
+    }
+}
