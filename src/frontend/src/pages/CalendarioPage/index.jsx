@@ -1,4 +1,4 @@
-import { ChevronLeft } from 'lucide-react'
+import { CheckCircle, ChevronLeft } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale/es'
@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button, Spinner } from '../../components/common'
 import { AppLayout } from '../../components/layout'
 import { getApiData, getApiErrorMessage } from '../../services/api'
+import { obtenerRegistroAsistencia } from '../../services/asistenciasService'
 import { obtenerHorarioClase } from '../../services/clasesService'
 import { formatTime } from '../../utils/claseUtils'
 import { getCurrentSchoolWeek, toIsoDate } from '../../utils/dateUtils'
@@ -24,6 +25,7 @@ export function CalendarioPage() {
   const [clase, setClase] = useState(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [registeredSlots, setRegisteredSlots] = useState(new Set())
 
   const weekDays = useMemo(
     () =>
@@ -72,6 +74,29 @@ export function CalendarioPage() {
       isActive = false
     }
   }, [id])
+
+  useEffect(() => {
+    if (!clase) return
+    let isActive = true
+
+    async function checkRegisteredSlots() {
+      const checks = clase.horarios.map(async (horario) => {
+        const weekDay = weekDays[horario.orden_dia - 1]
+        if (!weekDay) return null
+        try {
+          await obtenerRegistroAsistencia(horario.id_horario, weekDay.fecha)
+          return `${horario.id_horario}_${weekDay.fecha}`
+        } catch {
+          return null
+        }
+      })
+      const results = await Promise.all(checks)
+      if (isActive) setRegisteredSlots(new Set(results.filter(Boolean)))
+    }
+
+    checkRegisteredSlots()
+    return () => { isActive = false }
+  }, [clase, weekDays])
 
   const handleTomarAsistencia = (horarioId, fecha) => {
     navigate(`/asistencia/${horarioId}/${fecha}`)
@@ -142,6 +167,7 @@ export function CalendarioPage() {
                       day={day}
                       horarios={horariosDelDia}
                       key={day.fecha}
+                      registeredSlots={registeredSlots}
                       onTomarAsistencia={handleTomarAsistencia}
                     />
                   )
@@ -158,6 +184,7 @@ export function CalendarioPage() {
                       desktop
                       horarios={horariosDelDia}
                       key={day.fecha}
+                      registeredSlots={registeredSlots}
                       onTomarAsistencia={handleTomarAsistencia}
                     />
                   )
@@ -171,7 +198,7 @@ export function CalendarioPage() {
   )
 }
 
-function DaySchedule({ day, desktop = false, horarios, onTomarAsistencia }) {
+function DaySchedule({ day, desktop = false, horarios, onTomarAsistencia, registeredSlots }) {
   return (
     <article
       className={`overflow-hidden rounded-lg border border-border ${
@@ -196,25 +223,37 @@ function DaySchedule({ day, desktop = false, horarios, onTomarAsistencia }) {
 
       <div className="space-y-2 p-3">
         {horarios.length ? (
-          horarios.map((horario) => (
-            <Button
-              className={`h-auto w-full justify-start ${desktop ? 'py-2 text-xs' : 'py-3'}`}
-              key={horario.id_horario}
-              variant="secondary"
-              onClick={() => onTomarAsistencia(horario.id_horario, day.fecha)}
-            >
-              <span className="text-left">
-                <span className="block text-sm font-medium">
-                  {formatTime(horario.hora_inicio)} - {formatTime(horario.hora_fin)}
-                </span>
-                {!desktop ? (
-                  <span className="mt-0.5 block text-xs text-muted-foreground">
-                    Tomar asistencia
+          horarios.map((horario) => {
+            const isRegistered = registeredSlots.has(`${horario.id_horario}_${day.fecha}`)
+            return (
+              <Button
+                className={`h-auto w-full justify-start ${desktop ? 'py-2 text-xs' : 'py-3'} ${
+                  isRegistered
+                    ? 'border-success/25 bg-success-bg text-success hover:bg-success-bg/80'
+                    : ''
+                }`}
+                key={horario.id_horario}
+                variant="secondary"
+                onClick={() => onTomarAsistencia(horario.id_horario, day.fecha)}
+              >
+                <span className="flex w-full items-center justify-between gap-2 text-left">
+                  <span>
+                    <span className={`block text-sm font-medium ${isRegistered ? 'text-success' : ''}`}>
+                      {formatTime(horario.hora_inicio)} - {formatTime(horario.hora_fin)}
+                    </span>
+                    {!desktop ? (
+                      <span className={`mt-0.5 block text-xs ${isRegistered ? 'text-success/80' : 'text-muted-foreground'}`}>
+                        {isRegistered ? 'Registrada' : 'Tomar asistencia'}
+                      </span>
+                    ) : null}
                   </span>
-                ) : null}
-              </span>
-            </Button>
-          ))
+                  {isRegistered ? (
+                    <CheckCircle aria-hidden="true" className="h-4 w-4 shrink-0 text-success" />
+                  ) : null}
+                </span>
+              </Button>
+            )
+          })
         ) : (
           <p className="py-2 text-xs text-muted-foreground">
             {desktop ? 'Sin clases' : 'Sin clases programadas'}

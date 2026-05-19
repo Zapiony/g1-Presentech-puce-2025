@@ -8,8 +8,8 @@ export function LoginPage() {
   const navigate = useNavigate()
   const { isAuthenticated, login } = useAuth()
   const [credentials, setCredentials] = useState({
-    correo_institucional: 'cmendoza@feyalegria.edu.ec',
-    contrasena: 'Test1234!',
+    correo_institucional: '',
+    contrasena: '',
   })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)

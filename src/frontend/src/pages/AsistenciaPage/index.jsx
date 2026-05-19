@@ -1,6 +1,6 @@
 import { ChevronLeft } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AsistenciaForm } from '../../components/asistencias'
 import { Button, Spinner } from '../../components/common'
 import { AppLayout } from '../../components/layout'
@@ -20,6 +20,7 @@ function calculateResumen(asistencias) {
 }
 
 export function AsistenciaPage() {
+  const navigate = useNavigate()
   const { fecha, idHorario } = useParams()
   const {
     asistencias,
@@ -87,6 +88,7 @@ export function AsistenciaPage() {
       }
 
       setShowConfirm(false)
+      navigate('/clases')
     } catch (requestError) {
       setSaveError(getApiErrorMessage(requestError))
     } finally {

@@ -15,13 +15,13 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[#0f172a]/40 px-4 py-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[#0f172a]/40 px-4 pb-20 pt-4 sm:items-center sm:py-4"
       role="presentation"
       onMouseDown={onClose}
     >
       <section
         aria-modal="true"
-        className="w-full max-w-md rounded-lg border border-[#d9e2ef] bg-white p-5 text-left shadow-xl"
+        className="w-full max-w-md max-h-[calc(100svh-6rem)] overflow-y-auto rounded-lg border border-[#d9e2ef] bg-white p-5 text-left shadow-xl sm:max-h-[calc(100svh-2rem)]"
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
