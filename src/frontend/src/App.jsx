@@ -15,6 +15,14 @@ function App() {
         path="/"
         element={
           <ProtectedRoute>
+            <Navigate to="/clases" replace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pruebas"
+        element={
+          <ProtectedRoute>
             <ApiTesterPage />
           </ProtectedRoute>
         }

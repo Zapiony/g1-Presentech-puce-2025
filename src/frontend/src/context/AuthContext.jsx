@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem(TOKEN_KEY, data.token)
     localStorage.setItem(USER_KEY, JSON.stringify(data))
+    localStorage.setItem('docente_name', `${data.nombres} ${data.apellidos}`)
     setToken(data.token)
     setUser(data)
 
@@ -34,6 +35,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
+    localStorage.removeItem('docente_name')
     setToken(null)
     setUser(null)
   }, [])

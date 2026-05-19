@@ -6,10 +6,10 @@ export function AppLayout({ children, title }) {
   const { logout, user } = useAuth()
 
   return (
-    <main className="min-h-svh bg-[#f4f7fb] pb-20 text-[#172033] sm:pb-0">
+    <div className="flex min-h-svh flex-col bg-background text-foreground">
       <Header title={title} user={user} onLogout={logout} />
-      {children}
+      <main className="flex-1 overflow-x-hidden overflow-y-auto pb-16 md:pb-0">{children}</main>
       <BottomNav />
-    </main>
+    </div>
   )
 }

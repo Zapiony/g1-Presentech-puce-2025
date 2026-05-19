@@ -1,22 +1,21 @@
-import { CalendarDays, ClipboardCheck, GraduationCap, LayoutGrid } from 'lucide-react'
+import { CalendarDays, ClipboardList, GraduationCap } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const navItems = [
-  { icon: LayoutGrid, label: 'Pruebas', to: '/' },
   { icon: GraduationCap, label: 'Clases', to: '/clases' },
   { icon: CalendarDays, label: 'Calendario', to: '/calendario' },
-  { icon: ClipboardCheck, label: 'Asistencia', to: '/asistencia' },
+  { icon: ClipboardList, label: 'Asistencia', to: '/asistencia' },
 ]
 
 export function BottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#d9e2ef] bg-white sm:hidden">
-      <div className="grid grid-cols-4">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card md:hidden">
+      <div className="grid h-16 grid-cols-3">
         {navItems.map(({ icon: Icon, label, to }) => (
           <NavLink
             className={({ isActive }) =>
-              `flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-medium ${
-                isActive ? 'text-[#2563eb]' : 'text-[#667085]'
+              `flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`
             }
             end={to === '/'}

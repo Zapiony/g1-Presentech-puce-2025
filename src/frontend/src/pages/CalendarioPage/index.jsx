@@ -1,12 +1,22 @@
-import { ArrowLeft, CalendarDays } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale/es'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Button, Spinner } from '../../components/common'
-import { CalendarioSemanal } from '../../components/calendario'
 import { AppLayout } from '../../components/layout'
 import { getApiData, getApiErrorMessage } from '../../services/api'
 import { obtenerHorarioClase } from '../../services/clasesService'
-import { formatHorario } from '../../utils/claseUtils'
+import { formatTime } from '../../utils/claseUtils'
+import { getCurrentSchoolWeek, toIsoDate } from '../../utils/dateUtils'
+
+const dayNameByOrder = {
+  1: 'Lunes',
+  2: 'Martes',
+  3: 'Miércoles',
+  4: 'Jueves',
+  5: 'Viernes',
+}
 
 export function CalendarioPage() {
   const { id } = useParams()
@@ -15,19 +25,25 @@ export function CalendarioPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadHorario = useCallback(async () => {
-    setError('')
-    setIsLoading(true)
+  const weekDays = useMemo(
+    () =>
+      getCurrentSchoolWeek().map((date, index) => ({
+        date,
+        fecha: toIsoDate(date),
+        mes: format(date, 'MMMM', { locale: es }),
+        nombre: dayNameByOrder[index + 1],
+        numero: format(date, 'd'),
+      })),
+    [],
+  )
 
-    try {
-      const response = await obtenerHorarioClase(id)
-      setClase(getApiData(response))
-    } catch (requestError) {
-      setError(getApiErrorMessage(requestError))
-    } finally {
-      setIsLoading(false)
-    }
-  }, [id])
+  const weekTitle = useMemo(() => {
+    const first = weekDays[0].date
+    const last = weekDays[weekDays.length - 1].date
+    return `Semana del ${format(first, 'd', { locale: es })} al ${format(last, 'd MMMM', {
+      locale: es,
+    })}`
+  }, [weekDays])
 
   useEffect(() => {
     let isActive = true
@@ -57,65 +73,154 @@ export function CalendarioPage() {
     }
   }, [id])
 
-  const handleSelectHorario = ({ fecha, horario }) => {
-    navigate(`/asistencia/${horario.id_horario}/${fecha}`)
+  const handleTomarAsistencia = (horarioId, fecha) => {
+    navigate(`/asistencia/${horarioId}/${fecha}`)
   }
+
+  const getHorariosDelDia = (ordenDia) =>
+    clase?.horarios?.filter((horario) => horario.orden_dia === ordenDia) ?? []
 
   return (
     <AppLayout title="Calendario semanal">
-      <section className="mx-auto max-w-6xl px-4 py-5">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Button asChild variant="secondary">
-              <Link to="/clases">
-                <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-                Volver a clases
-              </Link>
-            </Button>
-            <h2 className="mt-4 text-xl font-semibold text-[#172033]">
-              {clase ? clase.materia : 'Horario de clase'}
-            </h2>
-            <p className="mt-1 text-sm text-[#667085]">
-              {clase ? clase.nombre_paralelo : 'Consulta los bloques semanales.'}
-            </p>
-          </div>
-          <Button variant="secondary" onClick={loadHorario} isLoading={isLoading}>
-            <CalendarDays aria-hidden="true" className="h-4 w-4" />
-            Actualizar
+      <section className="container mx-auto max-w-4xl px-4 py-4 md:py-6">
+        <div className="mb-6">
+          <Button
+            className="mb-3 -ml-2 min-h-9 px-2"
+            variant="ghost"
+            onClick={() => navigate('/clases')}
+          >
+            <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+            Volver a clases
           </Button>
+
+          <h2 className="text-lg font-medium text-foreground">
+            {clase ? clase.materia : 'Horario de clase'}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {clase ? clase.nombre_paralelo : 'Consulta los bloques semanales.'}
+          </p>
         </div>
 
         {error ? (
-          <p className="mb-4 rounded-md bg-[#fef2f2] px-3 py-2 text-sm text-[#b42318]">
+          <p className="mb-4 rounded-md border border-error bg-error-bg px-3 py-2 text-sm text-error">
             {error}
           </p>
         ) : null}
 
         {isLoading ? (
-          <div className="flex min-h-64 items-center justify-center rounded-lg border border-[#d9e2ef] bg-white">
+          <div className="flex min-h-64 items-center justify-center rounded-lg border border-border bg-card">
             <Spinner size="lg" />
           </div>
         ) : null}
 
         {!isLoading && clase ? (
-          <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-            <aside className="rounded-lg border border-[#d9e2ef] bg-white p-4 shadow-sm">
-              <h3 className="font-semibold text-[#172033]">Horarios</h3>
-              <div className="mt-3 grid gap-2">
+          <>
+            <section className="mb-6 rounded-lg border border-border bg-card p-4">
+              <p className="mb-3 text-sm font-medium text-foreground">Horarios asignados</p>
+              <div className="flex flex-wrap gap-2">
                 {clase.horarios.map((horario) => (
-                  <div
-                    className="rounded-md border border-[#d9e2ef] bg-[#f8fafc] px-3 py-2 text-sm text-[#475467]"
+                  <span
+                    className="rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
                     key={horario.id_horario}
                   >
-                    {formatHorario(horario)}
-                  </div>
+                    {horario.nombre_dia} {formatTime(horario.hora_inicio)}-
+                    {formatTime(horario.hora_fin)}
+                  </span>
                 ))}
               </div>
-            </aside>
-            <CalendarioSemanal clase={clase} onSelectHorario={handleSelectHorario} />
-          </div>
+            </section>
+
+            <section className="space-y-3">
+              <h3 className="mb-4 text-sm font-medium text-foreground">{weekTitle}</h3>
+
+              <div className="space-y-3 md:hidden">
+                {weekDays.map((day, index) => {
+                  const horariosDelDia = getHorariosDelDia(index + 1)
+
+                  return (
+                    <DaySchedule
+                      day={day}
+                      horarios={horariosDelDia}
+                      key={day.fecha}
+                      onTomarAsistencia={handleTomarAsistencia}
+                    />
+                  )
+                })}
+              </div>
+
+              <div className="hidden gap-3 md:grid md:grid-cols-5">
+                {weekDays.map((day, index) => {
+                  const horariosDelDia = getHorariosDelDia(index + 1)
+
+                  return (
+                    <DaySchedule
+                      day={day}
+                      desktop
+                      horarios={horariosDelDia}
+                      key={day.fecha}
+                      onTomarAsistencia={handleTomarAsistencia}
+                    />
+                  )
+                })}
+              </div>
+            </section>
+          </>
         ) : null}
       </section>
     </AppLayout>
+  )
+}
+
+function DaySchedule({ day, desktop = false, horarios, onTomarAsistencia }) {
+  return (
+    <article
+      className={`overflow-hidden rounded-lg border border-border ${
+        horarios.length ? 'bg-card' : 'bg-muted/30'
+      } ${desktop ? 'min-h-52' : ''}`}
+    >
+      <div className="border-b border-border bg-muted/50 p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-foreground">{day.nombre}</p>
+            <p className="text-xs capitalize text-muted-foreground">
+              {day.mes} {day.numero}
+            </p>
+          </div>
+          {!desktop && horarios.length ? (
+            <span className="rounded-full border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+              {horarios.length} {horarios.length === 1 ? 'clase' : 'clases'}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="space-y-2 p-3">
+        {horarios.length ? (
+          horarios.map((horario) => (
+            <Button
+              className={`h-auto w-full justify-start ${desktop ? 'py-2 text-xs' : 'py-3'}`}
+              key={horario.id_horario}
+              variant="secondary"
+              onClick={() => onTomarAsistencia(horario.id_horario, day.fecha)}
+            >
+              <span className="text-left">
+                <span className="block text-sm font-medium">
+                  {formatTime(horario.hora_inicio)} - {formatTime(horario.hora_fin)}
+                </span>
+                {!desktop ? (
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    Tomar asistencia
+                  </span>
+                ) : null}
+              </span>
+            </Button>
+          ))
+        ) : (
+          <p className="py-2 text-xs text-muted-foreground">
+            {desktop ? 'Sin clases' : 'Sin clases programadas'}
+          </p>
+        )}
+      </div>
+    </article>
   )
 }

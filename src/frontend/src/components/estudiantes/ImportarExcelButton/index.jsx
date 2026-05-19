@@ -1,11 +1,10 @@
-import { Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Button, Modal } from '../../common'
 import { importarEstudiantes } from '../../../services/estudiantesService'
 import { getApiErrorMessage } from '../../../services/api'
 import { parseEstudiantesExcel } from '../../../utils/excelUtils'
 
-export function ImportarExcelButton({ idParalelo, onImportSuccess }) {
+export function ImportarExcelButton({ children = 'Importar Excel', idParalelo, onImportSuccess }) {
   const inputRef = useRef(null)
   const [preview, setPreview] = useState([])
   const [error, setError] = useState('')
@@ -62,9 +61,8 @@ export function ImportarExcelButton({ idParalelo, onImportSuccess }) {
         ref={inputRef}
         type="file"
       />
-      <Button className="w-full" variant="secondary" onClick={openFilePicker}>
-        <Upload aria-hidden="true" className="h-4 w-4" />
-        Importar Excel
+      <Button className="w-full min-h-9 text-sm" variant="secondary" onClick={openFilePicker}>
+        {children}
       </Button>
       {error ? <p className="text-sm text-[#b42318]">{error}</p> : null}
       <Modal

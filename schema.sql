@@ -195,6 +195,10 @@ CREATE INDEX idx_pe_paralelo_activo    ON paralelo_estudiantes (id_paralelo, act
 -- DATOS SEMILLA
 -- =============================================================================
 
+-- Extension para generar hashes bcrypt en datos semilla.
+-- Permite que las credenciales de prueba funcionen con BCrypt.Net en el backend.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Días de la semana (catálogo fijo, no cambia)
 INSERT INTO dias_semana (nombre, orden) VALUES
     ('Lunes',     1),
@@ -204,13 +208,14 @@ INSERT INTO dias_semana (nombre, orden) VALUES
     ('Viernes',   5);
 
 -- Profesor de prueba
+-- Contrasena: Test1234!
 -- Contraseña: Test1234! (hash bcrypt de ejemplo — reemplazar con hash real en producción)
 INSERT INTO profesores (nombres, apellidos, correo_institucional, contrasena_hash, telefono, especialidad)
 VALUES (
     'Carlos',
     'Mendoza',
     'cmendoza@feyalegria.edu.ec',
-    '$2a$12$examplehashplaceholderXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    crypt('Test1234!', gen_salt('bf', 12)),
     '0991234567',
     'Ciencias Naturales'
 );
@@ -248,3 +253,81 @@ INSERT INTO paralelo_estudiantes (id_paralelo, id_estudiante) VALUES
     (1, 3),
     (1, 4),
     (1, 5);
+
+-- =============================================================================
+-- DATOS SEMILLA ADICIONALES -- DOCENTE DE PRUEBA 2
+-- =============================================================================
+
+-- Profesor de prueba adicional
+-- Correo: mfsalazar@feyalegria.edu.ec
+-- Contrasena: Docente456!
+INSERT INTO profesores (nombres, apellidos, correo_institucional, contrasena_hash, telefono, especialidad)
+VALUES (
+    'Maria Fernanda',
+    'Salazar',
+    'mfsalazar@feyalegria.edu.ec',
+    crypt('Docente456!', gen_salt('bf', 12)),
+    '0987654321',
+    'Matematicas y Lengua'
+);
+
+-- Paralelos asignados al segundo profesor
+INSERT INTO paralelos (nombre, descripcion, capacidad_maxima)
+VALUES
+    (
+        'General Basica - Primero B',
+        'Paralelo B de Primero de Educacion General Basica',
+        30
+    ),
+    (
+        'General Basica - Tercero C',
+        'Paralelo C de Tercero de Educacion General Basica',
+        32
+    );
+
+-- Clases asignadas al segundo profesor
+-- profesor 2 -> paralelo 2, materia Matematicas
+-- profesor 2 -> paralelo 3, materia Lengua y Literatura
+INSERT INTO clases (id_profesor, id_paralelo, materia, observaciones)
+VALUES
+    (2, 2, 'Matematicas', 'Clase de refuerzo numerico y razonamiento logico.'),
+    (2, 3, 'Lengua y Literatura', 'Lectura comprensiva y produccion escrita.');
+
+-- Horarios para las clases del segundo profesor
+-- Clase 2: Matematicas, Lunes y Jueves
+-- Clase 3: Lengua y Literatura, Martes y Viernes
+INSERT INTO clases_horario (id_clase, id_dia, hora_inicio, hora_fin)
+VALUES
+    (2, 1, '09:00', '10:00'),  -- Lunes
+    (2, 4, '10:30', '11:30'),  -- Jueves
+    (3, 2, '08:00', '09:00'),  -- Martes
+    (3, 5, '11:30', '12:30');  -- Viernes
+
+-- Estudiantes de prueba para los paralelos del segundo profesor
+INSERT INTO estudiantes (nombres, apellidos) VALUES
+    ('Daniel',    'Quishpe'),
+    ('Paula',     'Mora'),
+    ('Nicolas',   'Arias'),
+    ('Sofia',     'Cevallos'),
+    ('Mateo',     'Andrade'),
+    ('Valentina', 'Paredes'),
+    ('Emilio',    'Salazar'),
+    ('Daniela',   'Morales'),
+    ('Joaquin',   'Vera'),
+    ('Renata',    'Molina');
+
+-- Matricula activa para General Basica - Primero B
+INSERT INTO paralelo_estudiantes (id_paralelo, id_estudiante) VALUES
+    (2, 6),
+    (2, 7),
+    (2, 8),
+    (2, 9),
+    (2, 10);
+
+-- Matricula activa para General Basica - Tercero C
+INSERT INTO paralelo_estudiantes (id_paralelo, id_estudiante) VALUES
+    (3, 11),
+    (3, 12),
+    (3, 13),
+    (3, 14),
+    (3, 15);

@@ -1,7 +1,7 @@
 const statusClasses = {
-  presente: 'border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]',
-  ausente: 'border-[#fecaca] bg-[#fef2f2] text-[#991b1b]',
-  atrasado: 'border-[#fed7aa] bg-[#fff7ed] text-[#9a3412]',
+  presente: 'border-success/25 bg-success-bg text-success',
+  ausente: 'border-error/25 bg-error-bg text-error',
+  atrasado: 'border-warning/25 bg-warning-bg text-warning',
 }
 
 const statusLabels = {

@@ -18,40 +18,49 @@ export function AsistenciaForm({
   return (
     <>
       <form className="grid gap-4" onSubmit={onSubmit}>
-        <section className="rounded-lg border border-[#d9e2ef] bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[#172033]">
-                {isEditing ? 'Editar asistencia' : 'Nueva asistencia'}
-              </h2>
-              <p className="mt-1 text-sm text-[#667085]">
-                {resumen.presentes} presentes, {resumen.ausentes} ausentes.
-              </p>
-            </div>
-            <Button type="submit" isLoading={isSaving}>
-              <Save aria-hidden="true" className="h-4 w-4" />
-              {isEditing ? 'Actualizar' : 'Guardar'}
-            </Button>
+        <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <p className="mb-3 text-sm font-medium text-foreground">Resumen</p>
+          <div className="flex flex-wrap gap-4">
+            <SummaryItem colorClass="bg-success" label="Presentes" value={resumen.presentes} />
+            <SummaryItem colorClass="bg-destructive" label="Ausentes" value={resumen.ausentes} />
+            {resumen.atrasados > 0 ? (
+              <SummaryItem colorClass="bg-warning" label="Atrasados" value={resumen.atrasados} />
+            ) : null}
           </div>
+        </section>
 
-          <label className="mt-4 block text-left text-sm font-medium text-[#344054]">
-            Observaciones generales de la sesión
+        <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <label className="block text-left text-sm font-medium text-foreground">
+            Observaciones de la sesión (opcional)
             <textarea
-              className="mt-2 min-h-24 w-full resize-y rounded-md border border-[#cbd5e1] px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#bfdbfe]"
+              className="mt-2 min-h-20 w-full resize-y rounded-md border border-input-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              placeholder="Comentarios generales sobre la clase"
               value={observacionesSesion}
               onChange={(event) => setObservacionesSesion(event.target.value)}
             />
           </label>
         </section>
 
-        <div className="grid gap-4">
-          {asistencias.map((asistencia) => (
-            <AsistenciaItem
-              asistencia={asistencia}
-              key={asistencia.id_estudiante}
-              onChange={onChangeAsistencia}
-            />
-          ))}
+        <div>
+          <h3 className="mb-3 text-sm font-medium text-foreground">
+            Estudiantes ({asistencias.length})
+          </h3>
+          <div className="grid gap-4">
+            {asistencias.map((asistencia) => (
+              <AsistenciaItem
+                asistencia={asistencia}
+                key={asistencia.id_estudiante}
+                onChange={onChangeAsistencia}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="fixed inset-x-0 bottom-16 z-40 border-t border-border bg-background p-4 md:relative md:bottom-auto md:border-t-0 md:p-0">
+          <Button className="h-12 w-full" type="submit" isLoading={isSaving}>
+            <Save aria-hidden="true" className="h-4 w-4" />
+            {isEditing ? 'Actualizar asistencia' : 'Guardar asistencia'}
+          </Button>
         </div>
       </form>
 
@@ -66,5 +75,16 @@ export function AsistenciaForm({
         Se registrarán {resumen.presentes} presentes y {resumen.ausentes} ausentes.
       </Modal>
     </>
+  )
+}
+
+function SummaryItem({ colorClass, label, value }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`h-3 w-3 rounded-full ${colorClass}`} />
+      <span className="text-sm text-muted-foreground">
+        {label}: <span className="font-medium text-foreground">{value}</span>
+      </span>
+    </div>
   )
 }

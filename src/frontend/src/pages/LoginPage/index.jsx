@@ -25,7 +25,7 @@ export function LoginPage() {
 
     try {
       await login(credentials)
-      navigate('/', { replace: true })
+      navigate('/clases', { replace: true })
     } catch (requestError) {
       setError(getApiErrorMessage(requestError))
     } finally {
@@ -34,24 +34,29 @@ export function LoginPage() {
   }
 
   return (
-    <main className="min-h-svh bg-[#f4f7fb] px-4 py-8">
+    <main className="flex min-h-svh items-center justify-center bg-background px-4 py-8">
       <section className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col justify-center">
-        <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#2563eb]">
-            PresenTech
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold text-[#172033]">
-            Acceso docente
-          </h1>
-          <p className="mt-2 text-sm text-[#667085]">
-            Inicia sesión para probar los endpoints del módulo docente.
+        <div className="mb-8 flex flex-col items-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-primary">
+            <span className="text-2xl font-semibold text-primary-foreground">PT</span>
+          </div>
+          <h1 className="text-2xl font-semibold text-primary-dark">PresenTech</h1>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Sistema de gestión de asistencia
           </p>
         </div>
 
         <form
-          className="rounded-lg border border-[#d9e2ef] bg-white p-5 shadow-sm"
+          className="rounded-lg border border-border bg-card p-6 shadow-sm"
           onSubmit={handleSubmit}
         >
+          <div className="mb-6">
+            <h2 className="text-lg font-medium text-foreground">Acceso docente</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Ingrese sus credenciales institucionales
+            </p>
+          </div>
+
           <Input
             label="Correo institucional"
             type="email"
@@ -79,7 +84,7 @@ export function LoginPage() {
           </div>
 
           {error ? (
-            <p className="mt-4 rounded-md bg-[#fef2f2] px-3 py-2 text-sm text-[#b42318]">
+            <p className="mt-4 rounded-md border border-error bg-error-bg px-3 py-2 text-sm text-error">
               {error}
             </p>
           ) : null}
@@ -88,6 +93,9 @@ export function LoginPage() {
             {isSubmitting ? 'Ingresando...' : 'Ingresar'}
           </Button>
         </form>
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Fe y Alegría - Sistema educativo
+        </p>
       </section>
     </main>
   )

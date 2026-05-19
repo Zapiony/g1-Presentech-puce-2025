@@ -55,11 +55,11 @@ export function ClasesPage() {
 
   return (
     <AppLayout title="Mis clases">
-      <section className="mx-auto max-w-6xl px-4 py-5">
+      <section className="container mx-auto max-w-4xl px-4 py-4 md:py-6">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-[#172033]">Clases asignadas</h2>
-            <p className="mt-1 text-sm text-[#667085]">
+            <h2 className="text-xl font-medium text-foreground">Clases asignadas</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               Revisa materias, paralelos y horarios del módulo docente.
             </p>
           </div>
@@ -70,13 +70,13 @@ export function ClasesPage() {
         </div>
 
         {error ? (
-          <p className="mb-4 rounded-md bg-[#fef2f2] px-3 py-2 text-sm text-[#b42318]">
+          <p className="mb-4 rounded-md border border-error bg-error-bg px-3 py-2 text-sm text-error">
             {error}
           </p>
         ) : null}
 
         {isLoading ? (
-          <div className="flex min-h-64 items-center justify-center rounded-lg border border-[#d9e2ef] bg-white">
+          <div className="flex min-h-64 items-center justify-center rounded-lg border border-border bg-card">
             <Spinner size="lg" />
           </div>
         ) : null}
@@ -86,11 +86,11 @@ export function ClasesPage() {
         ) : null}
 
         {!isLoading && !clases.length && !error ? (
-          <div className="rounded-lg border border-[#d9e2ef] bg-white p-5 text-center shadow-sm">
-            <h2 className="text-lg font-semibold text-[#172033]">
+          <div className="rounded-lg border border-border bg-card p-5 text-center shadow-sm">
+            <h2 className="text-lg font-medium text-foreground">
               No hay clases asignadas
             </h2>
-            <p className="mt-2 text-sm text-[#667085]">
+            <p className="mt-2 text-sm text-muted-foreground">
               Cuando el docente tenga clases registradas, aparecerán en esta sección.
             </p>
           </div>

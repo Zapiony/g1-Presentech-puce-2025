@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AsistenciaForm } from '../../components/asistencias'
@@ -13,6 +13,7 @@ import {
 
 function calculateResumen(asistencias) {
   return {
+    atrasados: asistencias.filter((item) => item.atrasado).length,
     ausentes: asistencias.filter((item) => !item.asistio && !item.atrasado).length,
     presentes: asistencias.filter((item) => item.asistio || item.atrasado).length,
   }
@@ -94,37 +95,50 @@ export function AsistenciaPage() {
   }
 
   return (
-    <AppLayout title="Toma de asistencia">
-      <section className="mx-auto max-w-4xl px-4 py-5">
-        <div className="mb-4">
-          <Button asChild variant="secondary">
+    <AppLayout title="Asistencia">
+      <section className="container mx-auto max-w-3xl px-4 py-4 pb-28 md:py-6 md:pb-28">
+        <div className="mb-6">
+          <Button asChild className="mb-3 -ml-2 min-h-9 px-2" variant="ghost">
             <Link to="/clases">
-              <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-              Volver a clases
+              <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+              Volver
             </Link>
           </Button>
-          <h2 className="mt-4 text-xl font-semibold text-[#172033]">
-            {clase ? clase.materia : 'Asistencia'}
-          </h2>
-          <p className="mt-1 text-sm text-[#667085]">
-            {clase ? `${clase.nombre_paralelo} · ${fecha}` : fecha}
-          </p>
+
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-lg font-medium text-foreground">
+                {clase ? clase.materia : 'Asistencia'}
+              </h2>
+              {clase ? (
+                <span className="rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                  {clase.nombre_paralelo}
+                </span>
+              ) : null}
+              {isEditing ? (
+                <span className="rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary">
+                  Editando
+                </span>
+              ) : null}
+            </div>
+            <p className="text-sm text-muted-foreground">{fecha}</p>
+          </div>
         </div>
 
         {error || saveError ? (
-          <p className="mb-4 rounded-md bg-[#fef2f2] px-3 py-2 text-sm text-[#b42318]">
+          <p className="mb-4 rounded-md border border-error bg-error-bg px-3 py-2 text-sm text-error">
             {error || saveError}
           </p>
         ) : null}
 
         {isEditing ? (
-          <p className="mb-4 rounded-md border border-[#bfdbfe] bg-[#eff6ff] px-3 py-2 text-sm font-medium text-[#1d4ed8]">
+          <p className="mb-4 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm font-medium text-primary">
             Ya existe un registro para esta fecha. Estás trabajando en modo edición.
           </p>
         ) : null}
 
         {isLoading ? (
-          <div className="flex min-h-64 items-center justify-center rounded-lg border border-[#d9e2ef] bg-white">
+          <div className="flex min-h-64 items-center justify-center rounded-lg border border-border bg-card">
             <Spinner size="lg" />
           </div>
         ) : null}
@@ -146,11 +160,11 @@ export function AsistenciaPage() {
         ) : null}
 
         {!isLoading && !asistencias.length && !error ? (
-          <div className="rounded-lg border border-[#d9e2ef] bg-white p-5 text-center shadow-sm">
-            <h2 className="text-lg font-semibold text-[#172033]">
+          <div className="rounded-lg border border-border bg-card p-5 text-center shadow-sm">
+            <h2 className="text-lg font-medium text-foreground">
               No hay estudiantes activos
             </h2>
-            <p className="mt-2 text-sm text-[#667085]">
+            <p className="mt-2 text-sm text-muted-foreground">
               Importa estudiantes en el paralelo para poder tomar asistencia.
             </p>
           </div>

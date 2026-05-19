@@ -1,4 +1,4 @@
-import { CalendarDays, Clock, Users } from 'lucide-react'
+import { Calendar, Clock, Upload } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../common'
 import { formatHorario, formatTime, getProximaClase } from '../../../utils/claseUtils'
@@ -8,52 +8,52 @@ export function ClaseCard({ clase, onImportSuccess }) {
   const proximaClase = getProximaClase(clase.horarios)
 
   return (
-    <article className="rounded-lg border border-[#d9e2ef] bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold text-[#172033]">
-            {clase.materia}
-          </h2>
-          <p className="mt-1 flex items-center gap-2 text-sm text-[#667085]">
-            <Users aria-hidden="true" className="h-4 w-4 shrink-0 text-[#2563eb]" />
-            <span className="truncate">{clase.nombre_paralelo}</span>
-          </p>
+    <article className="rounded-lg border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+      <div className="mb-3 min-w-0">
+        <h2 className="truncate font-medium text-foreground">{clase.materia}</h2>
+        <p className="mt-1 truncate text-sm text-muted-foreground">
+          {clase.nombre_paralelo}
+        </p>
+      </div>
+
+      {proximaClase ? (
+        <div className="mb-3 flex items-center gap-2 rounded-md bg-primary/5 p-2">
+          <Clock aria-hidden="true" className="h-4 w-4 shrink-0 text-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground">Próxima clase</p>
+            <p className="truncate text-sm font-medium text-foreground">
+              {formatHorario(proximaClase)}
+            </p>
+          </div>
         </div>
-        <span className="rounded-md bg-[#eff6ff] px-2.5 py-1 text-xs font-semibold text-[#1d4ed8]">
-          Clase {clase.id_clase}
-        </span>
+      ) : null}
+
+      <div className="mb-4">
+        <p className="mb-2 text-xs text-muted-foreground">Horarios semanales</p>
+        <div className="flex flex-wrap gap-1.5">
+          {clase.horarios.map((horario) => (
+            <span
+              className="inline-flex rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
+              key={horario.id_horario}
+            >
+              {horario.nombre_dia.slice(0, 3)} {formatTime(horario.hora_inicio)}-
+              {formatTime(horario.hora_fin)}
+            </span>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-4 rounded-md border border-[#d9e2ef] bg-[#f8fafc] p-3">
-        <p className="flex items-center gap-2 text-sm font-semibold text-[#344054]">
-          <CalendarDays aria-hidden="true" className="h-4 w-4 text-[#2563eb]" />
-          Próxima clase
-        </p>
-        <p className="mt-1 text-sm text-[#667085]">
-          {proximaClase ? formatHorario(proximaClase) : 'Horario no asignado'}
-        </p>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        {clase.horarios.map((horario) => (
-          <span
-            className="inline-flex items-center gap-1 rounded-full border border-[#d9e2ef] px-2.5 py-1 text-xs font-medium text-[#475467]"
-            key={horario.id_horario}
-          >
-            <Clock aria-hidden="true" className="h-3.5 w-3.5 text-[#2563eb]" />
-            {horario.nombre_dia} {formatTime(horario.hora_inicio)}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-5 grid gap-2 sm:grid-cols-2">
-        <Button asChild className="w-full">
-          <Link to={`/clases/${clase.id_clase}/calendario`}>Ver calendario</Link>
+      <div className="flex flex-col gap-2">
+        <Button asChild className="w-full min-h-9 text-sm">
+          <Link to={`/clases/${clase.id_clase}/calendario`}>
+            <Calendar aria-hidden="true" className="h-4 w-4" />
+            Ver calendario
+          </Link>
         </Button>
-        <ImportarExcelButton
-          idParalelo={clase.id_paralelo}
-          onImportSuccess={onImportSuccess}
-        />
+        <ImportarExcelButton idParalelo={clase.id_paralelo} onImportSuccess={onImportSuccess}>
+          <Upload aria-hidden="true" className="h-4 w-4" />
+          Importar Excel
+        </ImportarExcelButton>
       </div>
     </article>
   )
